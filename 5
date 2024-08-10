@@ -1,0 +1,30 @@
+import numpy as np
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+np.random.seed(0)
+n_samples = 100
+mu_true = 5
+sigma_true = 2
+data = np.random.normal(mu_true, sigma_true, n_samples)
+def likelihood(params, data):
+    mu, sigma = params
+    return np.prod(norm.pdf(data, loc=mu, scale=sigma))
+def neg_log_likelihood(params, data):
+    return -np.log(likelihood(params, data))
+mu_init = 0
+sigma_init = 1
+params_init = np.array([mu_init, sigma_init])
+from scipy.optimize import minimize
+res = minimize(neg_log_likelihood, params_init, args=(data,), method="Nelder-Mead")
+mu_mle, sigma_mle = res.x
+print("Maximum Likelihood Estimation Results:")
+print(f"Estimated mean (mu): {mu_mle:.2f}")
+print(f"Estimated standard deviation (sigma): {sigma_mle:.2f}")
+plt.hist(data, bins=20, density=True, alpha=0.5, label="Data")
+x = np.linspace(data.min(), data.max(), 100)
+y = norm.pdf(x, loc=mu_mle, scale=sigma_mle)
+plt.plot(x, y, label="Estimated Normal Distribution")
+plt.xlabel("Value")
+plt.ylabel("Frequency")
+plt.legend()
+plt.show()
